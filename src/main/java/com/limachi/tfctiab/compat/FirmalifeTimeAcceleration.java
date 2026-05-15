@@ -8,6 +8,9 @@ import com.eerussianguy.firmalife.common.blockentities.LargePlanterBlockEntity;
 import com.eerussianguy.firmalife.common.blockentities.SimpleItemRecipeBlockEntity;
 import com.limachi.tfctiab.mixin.accessor.firmalife.CompostTumblerBlockEntityAccessor;
 import com.limachi.tfctiab.mixin.accessor.firmalife.FLBeehiveBlockEntityAccessor;
+import com.limachi.tfctiab.mixin.accessor.firmalife.GrapePlantBlockEntityAccessor;
+import com.limachi.tfctiab.mixin.accessor.firmalife.JarbnetBlockEntityAccessor;
+import com.limachi.tfctiab.mixin.accessor.firmalife.LargePlanterBlockEntityAccessor;
 import com.limachi.tfctiab.mixin.accessor.firmalife.SimpleItemRecipeBlockEntityAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
@@ -15,27 +18,35 @@ public final class FirmalifeTimeAcceleration
 {
     private static final long LONG_UNINITIALIZED_TICK = Long.MIN_VALUE;
 
-    public static void advanceTimestampState(BlockEntity blockEntity, long ticks)
+    public static boolean advanceTimestampState(BlockEntity blockEntity, long ticks)
     {
+        boolean changed = false;
         if (blockEntity instanceof LargePlanterBlockEntity planter)
         {
-            planter.setLastGrowthTick(TfcTimeAcceleration.subtractTimestamp(planter.getLastGrowthTick(), ticks));
+            ((LargePlanterBlockEntityAccessor) planter).tfcTiab$setLastGrowthTick(TfcTimeAcceleration.subtractTimestamp(planter.getLastGrowthTick(), ticks));
+            changed = true;
         }
         if (blockEntity instanceof GrapePlantBlockEntity grape)
         {
-            grape.setLastGrowthTick(TfcTimeAcceleration.subtractTimestamp(grape.getLastGrowthTick(), ticks));
+            ((GrapePlantBlockEntityAccessor) grape).tfcTiab$setLastGrowthTick(TfcTimeAcceleration.subtractTimestamp(grape.getLastGrowthTick(), ticks));
+            changed = true;
         }
         if (blockEntity instanceof CompostTumblerBlockEntity tumbler)
         {
             final CompostTumblerBlockEntityAccessor accessor = (CompostTumblerBlockEntityAccessor) tumbler;
-            accessor.tfcTiab$setLastUpdateTick(TfcTimeAcceleration.subtractTimestamp(accessor.tfcTiab$getLastUpdateTick(), ticks));
-            tumbler.setChanged();
+            final long lastUpdateTick = accessor.tfcTiab$getLastUpdateTick();
+            if (lastUpdateTick != LONG_UNINITIALIZED_TICK)
+            {
+                accessor.tfcTiab$setLastUpdateTick(TfcTimeAcceleration.subtractTimestamp(lastUpdateTick, ticks));
+                changed = true;
+            }
         }
         if (blockEntity instanceof JarbnetBlockEntity jarbnet)
         {
             if (jarbnet.getLastUpdateTick() != LONG_UNINITIALIZED_TICK)
             {
-                jarbnet.setLastUpdateTick(TfcTimeAcceleration.subtractTimestamp(jarbnet.getLastUpdateTick(), ticks));
+                ((JarbnetBlockEntityAccessor) jarbnet).tfcTiab$setLastUpdateTick(TfcTimeAcceleration.subtractTimestamp(jarbnet.getLastUpdateTick(), ticks));
+                changed = true;
             }
         }
         if (blockEntity instanceof SimpleItemRecipeBlockEntity<?> recipeBlock)
@@ -45,15 +56,16 @@ public final class FirmalifeTimeAcceleration
             if (startTick > 0)
             {
                 accessor.tfcTiab$setStartTick(TfcTimeAcceleration.subtractTimestamp(startTick, ticks));
-                recipeBlock.setChanged();
+                changed = true;
             }
         }
         if (blockEntity instanceof FLBeehiveBlockEntity beehive)
         {
             final FLBeehiveBlockEntityAccessor accessor = (FLBeehiveBlockEntityAccessor) beehive;
             accessor.tfcTiab$setLastAreaTick(TfcTimeAcceleration.subtractTimestamp(accessor.tfcTiab$getLastAreaTick(), ticks));
-            beehive.setChanged();
+            changed = true;
         }
+        return changed;
     }
 
     private FirmalifeTimeAcceleration() {}

@@ -9,9 +9,14 @@
     "accessor.tfc.BarrelBlockEntityAccessor",
     "accessor.tfc.BloomeryBlockEntityAccessor",
     "accessor.tfc.ComposterBlockEntityAccessor",
+    "accessor.tfc.CropBlockEntityAccessor",
     "accessor.tfc.PitKilnBlockEntityAccessor",
+    "accessor.tfc.TickCounterBlockEntityAccessor",
     "accessor.firmalife.CompostTumblerBlockEntityAccessor",
     "accessor.firmalife.FLBeehiveBlockEntityAccessor",
+    "accessor.firmalife.GrapePlantBlockEntityAccessor",
+    "accessor.firmalife.JarbnetBlockEntityAccessor",
+    "accessor.firmalife.LargePlanterBlockEntityAccessor",
     "accessor.firmalife.SimpleItemRecipeBlockEntityAccessor"
   ],
   "injectors": {

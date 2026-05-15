@@ -5,12 +5,15 @@ import com.limachi.tfctiab.config.TfcTiabConfig;
 import com.limachi.tfctiab.mixin.accessor.tfc.BarrelBlockEntityAccessor;
 import com.limachi.tfctiab.mixin.accessor.tfc.BloomeryBlockEntityAccessor;
 import com.limachi.tfctiab.mixin.accessor.tfc.ComposterBlockEntityAccessor;
+import com.limachi.tfctiab.mixin.accessor.tfc.CropBlockEntityAccessor;
 import com.limachi.tfctiab.mixin.accessor.tfc.PitKilnBlockEntityAccessor;
+import com.limachi.tfctiab.mixin.accessor.tfc.TickCounterBlockEntityAccessor;
 import net.dries007.tfc.common.blockentities.BarrelBlockEntity;
 import net.dries007.tfc.common.blockentities.BerryBushBlockEntity;
 import net.dries007.tfc.common.blockentities.BloomeryBlockEntity;
 import net.dries007.tfc.common.blockentities.ComposterBlockEntity;
 import net.dries007.tfc.common.blockentities.CropBlockEntity;
+import net.dries007.tfc.common.blockentities.TFCBlockEntity;
 import net.dries007.tfc.common.blockentities.TickCounterBlockEntity;
 import net.dries007.tfc.common.blocks.devices.BloomeryBlock;
 import net.dries007.tfc.util.calendar.Calendars;
@@ -20,6 +23,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -50,17 +54,26 @@ public final class TfcTimeAcceleration
         final BlockEntity firstBlockEntity = level.getBlockEntity(pos);
         if (shouldHandle(firstState, firstBlockEntity) && firstBlockEntity != null && tickerFor(level, firstState, firstBlockEntity) == null)
         {
-            advanceTimestampState(firstBlockEntity, firstState, timeRate);
+            final boolean changed = advanceTimestampState(firstBlockEntity, firstState, timeRate);
             runRandomTicks(serverLevel, level, pos, timeRate);
+            if (changed)
+            {
+                syncTimestampState(level, pos);
+            }
             return;
         }
 
+        boolean changed = false;
         for (int i = 0; i < timeRate; i++)
         {
             final BlockState state = level.getBlockState(pos);
             final BlockEntity blockEntity = level.getBlockEntity(pos);
             if (!shouldHandle(state, blockEntity))
             {
+                if (changed)
+                {
+                    syncTimestampState(level, pos);
+                }
                 if (blockEntity == null && !state.isRandomlyTicking())
                 {
                     remove.accept(Entity.RemovalReason.KILLED);
@@ -68,7 +81,7 @@ public final class TfcTimeAcceleration
                 return;
             }
 
-            advanceTimestampState(blockEntity, state, 1);
+            changed |= advanceTimestampState(blockEntity, state, 1);
 
             if (blockEntity != null)
             {
@@ -77,6 +90,10 @@ public final class TfcTimeAcceleration
 
             runRandomTicks(serverLevel, level, pos, 1);
         }
+        if (changed)
+        {
+            syncTimestampState(level, pos);
+        }
     }
 
     private static boolean shouldHandle(BlockState state, BlockEntity blockEntity)
@@ -84,23 +101,26 @@ public final class TfcTimeAcceleration
         return isTfcOrFirmalife(blockId(state)) || isTfcOrFirmalife(blockEntityTypeId(blockEntity));
     }
 
-    private static void advanceTimestampState(BlockEntity blockEntity, BlockState state, long ticks)
+    private static boolean advanceTimestampState(BlockEntity blockEntity, BlockState state, long ticks)
     {
+        boolean changed = false;
         if (blockEntity instanceof TickCounterBlockEntity counter)
         {
             if (counter.getLastUpdateTick() != UNINITIALIZED_TICK)
             {
-                counter.setLastUpdateTick(subtractTimestamp(counter.getLastUpdateTick(), ticks));
+                ((TickCounterBlockEntityAccessor) counter).tfcTiab$setLastUpdateTick(subtractTimestamp(counter.getLastUpdateTick(), ticks));
+                changed = true;
             }
         }
         if (blockEntity instanceof CropBlockEntity crop)
         {
-            crop.setLastGrowthTick(subtractTimestamp(crop.getLastGrowthTick(), ticks));
+            ((CropBlockEntityAccessor) crop).tfcTiab$setLastGrowthTick(subtractTimestamp(crop.getLastGrowthTick(), ticks));
+            changed = true;
         }
         if (blockEntity instanceof BerryBushBlockEntity bush)
         {
             bush.setLastBushTick(subtractTimestamp(Calendars.SERVER.getTicks() - bush.getTicksSinceBushUpdate(), ticks));
-            bush.setChanged();
+            changed = true;
         }
         if (blockEntity instanceof ComposterBlockEntity composter)
         {
@@ -109,7 +129,7 @@ public final class TfcTimeAcceleration
             if (lastUpdateTick != UNINITIALIZED_TICK)
             {
                 accessor.tfcTiab$setLastUpdateTick(subtractTimestamp(lastUpdateTick, ticks));
-                composter.setChanged();
+                changed = true;
             }
         }
         if (blockEntity instanceof BarrelBlockEntity barrel)
@@ -118,27 +138,44 @@ public final class TfcTimeAcceleration
             if (barrel.getRecipeTick() > 0)
             {
                 accessor.tfcTiab$setRecipeTick(subtractTimestamp(barrel.getRecipeTick(), ticks));
+                changed = true;
             }
             if (barrel.getSealedTick() > 0)
             {
                 accessor.tfcTiab$setSealedTick(subtractTimestamp(barrel.getSealedTick(), ticks));
+                changed = true;
             }
-            barrel.setChanged();
         }
         if (blockEntity instanceof BloomeryBlockEntity bloomery && state.getBlock() instanceof BloomeryBlock && state.getValue(BloomeryBlock.LIT))
         {
             final BloomeryBlockEntityAccessor accessor = (BloomeryBlockEntityAccessor) bloomery;
             accessor.tfcTiab$setLitTick(subtractTimestamp(accessor.tfcTiab$getLitTick(), ticks));
-            bloomery.setChanged();
+            changed = true;
         }
         if (blockEntity instanceof net.dries007.tfc.common.blockentities.PitKilnBlockEntity pitKiln && pitKiln.isLit())
         {
             ((PitKilnBlockEntityAccessor) pitKiln).tfcTiab$setLitTick(subtractTimestamp(pitKiln.getLitTick(), ticks));
-            pitKiln.setChanged();
+            changed = true;
         }
         if (ModList.get().isLoaded(FIRMALIFE))
         {
-            FirmalifeTimeAcceleration.advanceTimestampState(blockEntity, ticks);
+            changed |= FirmalifeTimeAcceleration.advanceTimestampState(blockEntity, ticks);
+        }
+        return changed;
+    }
+
+    private static void syncTimestampState(Level level, BlockPos pos)
+    {
+        final BlockEntity blockEntity = level.getBlockEntity(pos);
+        if (blockEntity instanceof TFCBlockEntity tfcBlockEntity)
+        {
+            tfcBlockEntity.markForSync();
+        }
+        else if (blockEntity != null)
+        {
+            blockEntity.setChanged();
+            final BlockState state = level.getBlockState(pos);
+            level.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS);
         }
     }
 
@@ -223,12 +260,8 @@ public final class TfcTimeAcceleration
         {
             return tick;
         }
-        if (tick < 0)
-        {
-            final long result = tick - ticks;
-            return result > tick ? Long.MIN_VALUE : result;
-        }
-        return ticks >= tick ? 0 : tick - ticks;
+        final long result = tick - ticks;
+        return result > tick ? Long.MIN_VALUE : result;
     }
 
     private static boolean isTfcOrFirmalife(ResourceLocation id)
