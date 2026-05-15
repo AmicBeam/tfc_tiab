@@ -50,46 +50,24 @@ public final class TfcTimeAcceleration
     public static void tick(Level level, BlockPos pos, int timeRate, Consumer<Entity.RemovalReason> remove)
     {
         final ServerLevel serverLevel = level instanceof ServerLevel server ? server : null;
-        final BlockState firstState = level.getBlockState(pos);
-        final BlockEntity firstBlockEntity = level.getBlockEntity(pos);
-        if (shouldHandle(firstState, firstBlockEntity) && firstBlockEntity != null && tickerFor(level, firstState, firstBlockEntity) == null)
+        final BlockState state = level.getBlockState(pos);
+        final BlockEntity blockEntity = level.getBlockEntity(pos);
+        if (!shouldHandle(state, blockEntity))
         {
-            final boolean changed = advanceTimestampState(firstBlockEntity, firstState, timeRate);
-            runRandomTicks(serverLevel, level, pos, timeRate);
-            if (changed)
+            if (blockEntity == null && !state.isRandomlyTicking())
             {
-                syncTimestampState(level, pos);
+                remove.accept(Entity.RemovalReason.KILLED);
             }
             return;
         }
 
-        boolean changed = false;
-        for (int i = 0; i < timeRate; i++)
+        final boolean changed = advanceTimestampState(blockEntity, state, timeRate);
+        if (blockEntity != null && tickerFor(level, state, blockEntity) != null)
         {
-            final BlockState state = level.getBlockState(pos);
-            final BlockEntity blockEntity = level.getBlockEntity(pos);
-            if (!shouldHandle(state, blockEntity))
-            {
-                if (changed)
-                {
-                    syncTimestampState(level, pos);
-                }
-                if (blockEntity == null && !state.isRandomlyTicking())
-                {
-                    remove.accept(Entity.RemovalReason.KILLED);
-                }
-                return;
-            }
-
-            changed |= advanceTimestampState(blockEntity, state, 1);
-
-            if (blockEntity != null)
-            {
-                tickBlockEntity(level, pos, state, blockEntity);
-            }
-
-            runRandomTicks(serverLevel, level, pos, 1);
+            tickBlockEntity(level, pos, state, blockEntity);
         }
+
+        runRandomTicks(serverLevel, level, pos, timeRate);
         if (changed)
         {
             syncTimestampState(level, pos);
