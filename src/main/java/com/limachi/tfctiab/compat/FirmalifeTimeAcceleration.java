@@ -19,23 +19,23 @@ public final class FirmalifeTimeAcceleration
     {
         if (blockEntity instanceof LargePlanterBlockEntity planter)
         {
-            planter.setLastGrowthTick(planter.getLastGrowthTick() - ticks);
+            planter.setLastGrowthTick(TfcTimeAcceleration.subtractTimestamp(planter.getLastGrowthTick(), ticks));
         }
         if (blockEntity instanceof GrapePlantBlockEntity grape)
         {
-            grape.setLastGrowthTick(grape.getLastGrowthTick() - ticks);
+            grape.setLastGrowthTick(TfcTimeAcceleration.subtractTimestamp(grape.getLastGrowthTick(), ticks));
         }
         if (blockEntity instanceof CompostTumblerBlockEntity tumbler)
         {
             final CompostTumblerBlockEntityAccessor accessor = (CompostTumblerBlockEntityAccessor) tumbler;
-            accessor.tfcTiab$setLastUpdateTick(accessor.tfcTiab$getLastUpdateTick() - ticks);
+            accessor.tfcTiab$setLastUpdateTick(TfcTimeAcceleration.subtractTimestamp(accessor.tfcTiab$getLastUpdateTick(), ticks));
             tumbler.setChanged();
         }
         if (blockEntity instanceof JarbnetBlockEntity jarbnet)
         {
             if (jarbnet.getLastUpdateTick() != LONG_UNINITIALIZED_TICK)
             {
-                jarbnet.setLastUpdateTick(jarbnet.getLastUpdateTick() - ticks);
+                jarbnet.setLastUpdateTick(TfcTimeAcceleration.subtractTimestamp(jarbnet.getLastUpdateTick(), ticks));
             }
         }
         if (blockEntity instanceof SimpleItemRecipeBlockEntity<?> recipeBlock)
@@ -44,14 +44,14 @@ public final class FirmalifeTimeAcceleration
             final long startTick = accessor.tfcTiab$getStartTick();
             if (startTick > 0)
             {
-                accessor.tfcTiab$setStartTick(startTick - ticks);
+                accessor.tfcTiab$setStartTick(TfcTimeAcceleration.subtractTimestamp(startTick, ticks));
                 recipeBlock.setChanged();
             }
         }
         if (blockEntity instanceof FLBeehiveBlockEntity beehive)
         {
             final FLBeehiveBlockEntityAccessor accessor = (FLBeehiveBlockEntityAccessor) beehive;
-            accessor.tfcTiab$setLastAreaTick(accessor.tfcTiab$getLastAreaTick() - ticks);
+            accessor.tfcTiab$setLastAreaTick(TfcTimeAcceleration.subtractTimestamp(accessor.tfcTiab$getLastAreaTick(), ticks));
             beehive.setChanged();
         }
     }
