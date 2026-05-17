@@ -3,7 +3,6 @@
 **Read this in other languages: [简体中文](README_CN.md)**
 
 Time In A Bottle integration for TerraFirmaCraft and Firmalife.  
-Chinese display name: **群峦传说：光阴荏苒**.
 
 TerraFirmaCraft and Firmalife use TFC calendar timestamps for many long-running processes. Because of that, Time In A Bottle's normal extra block ticks do not always speed them up. This mod adds timestamp-aware acceleration while preserving vanilla-style and machine ticker behavior.
 
