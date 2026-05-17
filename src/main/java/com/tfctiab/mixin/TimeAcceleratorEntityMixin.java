@@ -1,6 +1,6 @@
-package com.limachi.tfctiab.mixin;
+package com.tfctiab.mixin;
 
-import com.limachi.tfctiab.compat.TfcTimeAcceleration;
+import com.tfctiab.compat.TfcTimeAcceleration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;

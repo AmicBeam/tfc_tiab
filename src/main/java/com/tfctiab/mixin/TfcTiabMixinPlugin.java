@@ -1,4 +1,4 @@
-package com.limachi.tfctiab.mixin;
+package com.tfctiab.mixin;
 
 import java.util.List;
 import java.util.Set;

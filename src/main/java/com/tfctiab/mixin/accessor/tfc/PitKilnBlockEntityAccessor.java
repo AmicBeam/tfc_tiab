@@ -1,4 +1,4 @@
-package com.limachi.tfctiab.mixin.accessor.tfc;
+package com.tfctiab.mixin.accessor.tfc;
 
 import net.dries007.tfc.common.blockentities.PitKilnBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;

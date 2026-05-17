@@ -1,6 +1,6 @@
-package com.limachi.tfctiab;
+package com.tfctiab;
 
-import com.limachi.tfctiab.config.TfcTiabConfig;
+import com.tfctiab.config.TfcTiabConfig;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;

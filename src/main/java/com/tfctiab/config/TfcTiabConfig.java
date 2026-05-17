@@ -1,4 +1,4 @@
-package com.limachi.tfctiab.config;
+package com.tfctiab.config;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 

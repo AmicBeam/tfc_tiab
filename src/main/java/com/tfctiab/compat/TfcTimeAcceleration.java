@@ -1,13 +1,13 @@
-package com.limachi.tfctiab.compat;
+package com.tfctiab.compat;
 
 import java.util.function.Consumer;
-import com.limachi.tfctiab.config.TfcTiabConfig;
-import com.limachi.tfctiab.mixin.accessor.tfc.BarrelBlockEntityAccessor;
-import com.limachi.tfctiab.mixin.accessor.tfc.BloomeryBlockEntityAccessor;
-import com.limachi.tfctiab.mixin.accessor.tfc.ComposterBlockEntityAccessor;
-import com.limachi.tfctiab.mixin.accessor.tfc.CropBlockEntityAccessor;
-import com.limachi.tfctiab.mixin.accessor.tfc.PitKilnBlockEntityAccessor;
-import com.limachi.tfctiab.mixin.accessor.tfc.TickCounterBlockEntityAccessor;
+import com.tfctiab.config.TfcTiabConfig;
+import com.tfctiab.mixin.accessor.tfc.BarrelBlockEntityAccessor;
+import com.tfctiab.mixin.accessor.tfc.BloomeryBlockEntityAccessor;
+import com.tfctiab.mixin.accessor.tfc.ComposterBlockEntityAccessor;
+import com.tfctiab.mixin.accessor.tfc.CropBlockEntityAccessor;
+import com.tfctiab.mixin.accessor.tfc.PitKilnBlockEntityAccessor;
+import com.tfctiab.mixin.accessor.tfc.TickCounterBlockEntityAccessor;
 import net.dries007.tfc.common.blockentities.BarrelBlockEntity;
 import net.dries007.tfc.common.blockentities.BerryBushBlockEntity;
 import net.dries007.tfc.common.blockentities.BloomeryBlockEntity;

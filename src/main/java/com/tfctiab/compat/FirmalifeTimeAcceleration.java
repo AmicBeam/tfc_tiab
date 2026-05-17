@@ -1,4 +1,4 @@
-package com.limachi.tfctiab.compat;
+package com.tfctiab.compat;
 
 import com.eerussianguy.firmalife.common.blockentities.CompostTumblerBlockEntity;
 import com.eerussianguy.firmalife.common.blockentities.FLBeehiveBlockEntity;
@@ -6,12 +6,12 @@ import com.eerussianguy.firmalife.common.blockentities.GrapePlantBlockEntity;
 import com.eerussianguy.firmalife.common.blockentities.JarbnetBlockEntity;
 import com.eerussianguy.firmalife.common.blockentities.LargePlanterBlockEntity;
 import com.eerussianguy.firmalife.common.blockentities.SimpleItemRecipeBlockEntity;
-import com.limachi.tfctiab.mixin.accessor.firmalife.CompostTumblerBlockEntityAccessor;
-import com.limachi.tfctiab.mixin.accessor.firmalife.FLBeehiveBlockEntityAccessor;
-import com.limachi.tfctiab.mixin.accessor.firmalife.GrapePlantBlockEntityAccessor;
-import com.limachi.tfctiab.mixin.accessor.firmalife.JarbnetBlockEntityAccessor;
-import com.limachi.tfctiab.mixin.accessor.firmalife.LargePlanterBlockEntityAccessor;
-import com.limachi.tfctiab.mixin.accessor.firmalife.SimpleItemRecipeBlockEntityAccessor;
+import com.tfctiab.mixin.accessor.firmalife.CompostTumblerBlockEntityAccessor;
+import com.tfctiab.mixin.accessor.firmalife.FLBeehiveBlockEntityAccessor;
+import com.tfctiab.mixin.accessor.firmalife.GrapePlantBlockEntityAccessor;
+import com.tfctiab.mixin.accessor.firmalife.JarbnetBlockEntityAccessor;
+import com.tfctiab.mixin.accessor.firmalife.LargePlanterBlockEntityAccessor;
+import com.tfctiab.mixin.accessor.firmalife.SimpleItemRecipeBlockEntityAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 public final class FirmalifeTimeAcceleration

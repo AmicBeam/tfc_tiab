@@ -1,4 +1,4 @@
-package com.limachi.tfctiab.mixin.accessor.firmalife;
+package com.tfctiab.mixin.accessor.firmalife;
 
 import com.eerussianguy.firmalife.common.blockentities.LargePlanterBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
