@@ -8,14 +8,18 @@ import com.tfctiab.mixin.accessor.tfc.ComposterBlockEntityAccessor;
 import com.tfctiab.mixin.accessor.tfc.CropBlockEntityAccessor;
 import com.tfctiab.mixin.accessor.tfc.PitKilnBlockEntityAccessor;
 import com.tfctiab.mixin.accessor.tfc.TickCounterBlockEntityAccessor;
+import net.dries007.tfc.common.blockentities.AbstractFirepitBlockEntity;
 import net.dries007.tfc.common.blockentities.BarrelBlockEntity;
 import net.dries007.tfc.common.blockentities.BerryBushBlockEntity;
 import net.dries007.tfc.common.blockentities.BloomeryBlockEntity;
+import net.dries007.tfc.common.blockentities.CharcoalForgeBlockEntity;
 import net.dries007.tfc.common.blockentities.ComposterBlockEntity;
 import net.dries007.tfc.common.blockentities.CropBlockEntity;
+import net.dries007.tfc.common.blockentities.CrucibleBlockEntity;
 import net.dries007.tfc.common.blockentities.TFCBlockEntity;
 import net.dries007.tfc.common.blockentities.TickCounterBlockEntity;
 import net.dries007.tfc.common.blocks.devices.BloomeryBlock;
+import net.dries007.tfc.common.capabilities.heat.HeatCapability;
 import net.dries007.tfc.util.calendar.Calendars;
 import net.dries007.tfc.util.calendar.ICalendarTickable;
 import net.minecraft.core.BlockPos;
@@ -62,9 +66,17 @@ public final class TfcTimeAcceleration
         }
 
         final boolean changed = advanceTimestampState(blockEntity, state, timeRate);
-        if (blockEntity != null && tickerFor(level, state, blockEntity) != null)
+        for (int tick = 0; tick < timeRate && blockEntity != null; tick++)
         {
-            tickBlockEntity(level, pos, state, blockEntity);
+            final BlockState currentState = level.getBlockState(pos);
+            if (blockEntity.isRemoved() || level.getBlockEntity(pos) != blockEntity || !shouldHandle(currentState, blockEntity))
+            {
+                break;
+            }
+            if (!tickBlockEntity(level, pos, currentState, blockEntity))
+            {
+                break;
+            }
         }
 
         runRandomTicks(serverLevel, level, pos, timeRate);
@@ -158,13 +170,63 @@ public final class TfcTimeAcceleration
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static void tickBlockEntity(Level level, BlockPos pos, BlockState state, BlockEntity blockEntity)
+    private static boolean tickBlockEntity(Level level, BlockPos pos, BlockState state, BlockEntity blockEntity)
     {
-        alignCalendarTick(blockEntity);
         final BlockEntityTicker<BlockEntity> ticker = tickerFor(level, state, blockEntity);
-        if (ticker != null)
+        if (ticker == null)
         {
+            return false;
+        }
+        final long currentTick = Calendars.SERVER.getTicks();
+        final boolean worldTickPending = blockEntity instanceof ICalendarTickable calendarTickable
+            && calendarTickable.getLastCalendarUpdateTick() == currentTick - 1;
+        alignCalendarTick(blockEntity);
+        try
+        {
+            refreshCrucibleHeat(level, pos, blockEntity);
             ticker.tick(level, pos, state, blockEntity);
+        }
+        finally
+        {
+            // Entity ticks can precede the normal block tick. Leave that tick a
+            // valid calendar delta as well, rather than making it process -1.
+            if (worldTickPending && blockEntity instanceof ICalendarTickable calendarTickable
+                && calendarTickable.getLastCalendarUpdateTick() == currentTick)
+            {
+                calendarTickable.setLastCalendarUpdateTick(currentTick - 1);
+            }
+        }
+        return true;
+    }
+
+    private static void refreshCrucibleHeat(Level level, BlockPos pos, BlockEntity blockEntity)
+    {
+        if (!(blockEntity instanceof CrucibleBlockEntity))
+        {
+            return;
+        }
+        final BlockEntity source = level.getBlockEntity(pos.below());
+        final float temperature;
+        if (source instanceof CharcoalForgeBlockEntity forge)
+        {
+            temperature = forge.getTemperature();
+        }
+        else if (source instanceof AbstractFirepitBlockEntity<?> firepit)
+        {
+            temperature = firepit.getTemperature();
+        }
+        else
+        {
+            return;
+        }
+        if (temperature > 0)
+        {
+            // The source normally supplies heat once per world tick. Extra crucible
+            // ticks must also refresh its five-tick heat window, without burning more fuel.
+            blockEntity.getCapability(HeatCapability.BLOCK_CAPABILITY).ifPresent(heat -> {
+                heat.setTemperature(temperature);
+                heat.setTemperatureIfWarmer(temperature);
+            });
         }
     }
 

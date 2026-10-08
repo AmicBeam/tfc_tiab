@@ -37,7 +37,8 @@ Time In A Bottle creates a temporary acceleration entity on the clicked block. N
 This is not enough for many TFC systems because they compare the current TFC calendar tick against a saved timestamp. This mod intercepts the Time In A Bottle acceleration entity when the target belongs to `tfc` or `firmalife`, then:
 
 - advances the target's relevant timestamp state locally;
-- still runs the target block entity ticker when present;
+- runs the target block entity ticker once per extra tick requested by Time In A Bottle, rechecking the target between ticks;
+- refreshes heat from a TFC charcoal forge or firepit below an accelerated crucible so extra ticks do not exhaust its heat-source stability window;
 - still performs random tick attempts for random-ticking blocks;
 - aligns `ICalendarTickable` machines so repeated extra ticks do not create invalid negative calendar deltas.
 
@@ -66,6 +67,11 @@ Covered process types include:
 - berry bush update timestamps
 - selected TFC machine/process timestamps such as barrel, bloomery, pit kiln, and composter
 - selected Firmalife timestamps such as large planters, grape plants, drying/smoking start ticks, compost tumblers, jarbnets, and beehives
+
+## Changes in 0.0.2
+
+- Fixed machine acceleration being limited to one extra tick regardless of the selected multiplier, affecting crucible melting and other ticker-based machines.
+- Kept crucible heat input in sync with extra ticks without accelerating the heat source's fuel consumption.
 
 ## Building
 
