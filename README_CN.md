@@ -18,11 +18,13 @@ TerraFirmaCraft 与 Firmalife 中有许多长流程并不是单纯依靠每 tick
 
 ## 前置要求
 
-- Minecraft 1.20.1
-- Forge 47.1.3+
-- TerraFirmaCraft
-- Time In A Bottle 4.0.0+
-- Firmalife 可选
+- Minecraft 1.21.1
+- NeoForge 21.1.234+
+- Java 21
+- TerraFirmaCraft 4.2.16+
+- Patchouli 1.21.1-92-NEOFORGE+
+- Time In A Bottle 6.5.4+ (NeoForge)
+- Firmalife 3.0.16+（可选）
 
 ## 安装
 
@@ -59,7 +61,7 @@ config/tfc_tiab-server.toml
 
 ## 兼容说明
 
-本模组面向 Forge 1.20.1 版本的 TerraFirmaCraft、Firmalife 与 Time In A Bottle。
+0.1.0 面向 Minecraft 1.21.1 NeoForge。Minecraft 1.20.1 Forge 版在 [main 分支](https://github.com/AmicBeam/tfc_tiab/tree/main)。
 
 当前覆盖的流程类型包括：
 
@@ -69,10 +71,10 @@ config/tfc_tiab-server.toml
 - 部分 TFC 机器/流程时间戳，例如木桶、冶铁炉、坑窑、堆肥桶
 - 部分 Firmalife 时间戳，例如大型花盆、葡萄、晾晒/烟熏开始时间、堆肥滚筒、灯笼网、蜂箱
 
-## 0.0.2 更新
+## 0.1.0 更新
 
-- 修复机器无论选择多少倍率都只额外 tick 一次的问题，恢复坩埚熔矿等普通 ticker 机器的倍率加速。
-- 同步坩埚额外 tick 的供热，不额外加速下方热源的燃料消耗。
+- 移植到 Minecraft 1.21.1 NeoForge，对接 TIAB 6.5.4、TFC 4.2.16 和可选的 Firmalife 3.0.16。
+- TFC 和 Firmalife 联动遵循 TIAB 的方块黑名单。
 
 ## 构建
 
@@ -87,6 +89,8 @@ config/tfc_tiab-server.toml
 ```text
 build/libs/
 ```
+
+使用 `./gradlew runServer -PwithFirmalife` 可在开发服务端中加载 Firmalife。
 
 ## 许可证
 

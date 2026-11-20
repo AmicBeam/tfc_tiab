@@ -10,7 +10,6 @@ import com.tfctiab.mixin.accessor.tfc.PitKilnBlockEntityAccessor;
 import com.tfctiab.mixin.accessor.tfc.TickCounterBlockEntityAccessor;
 import net.dries007.tfc.common.blockentities.AbstractFirepitBlockEntity;
 import net.dries007.tfc.common.blockentities.BarrelBlockEntity;
-import net.dries007.tfc.common.blockentities.BerryBushBlockEntity;
 import net.dries007.tfc.common.blockentities.BloomeryBlockEntity;
 import net.dries007.tfc.common.blockentities.CharcoalForgeBlockEntity;
 import net.dries007.tfc.common.blockentities.ComposterBlockEntity;
@@ -19,10 +18,12 @@ import net.dries007.tfc.common.blockentities.CrucibleBlockEntity;
 import net.dries007.tfc.common.blockentities.TFCBlockEntity;
 import net.dries007.tfc.common.blockentities.TickCounterBlockEntity;
 import net.dries007.tfc.common.blocks.devices.BloomeryBlock;
-import net.dries007.tfc.common.capabilities.heat.HeatCapability;
+import net.dries007.tfc.common.component.heat.HeatCapability;
 import net.dries007.tfc.util.calendar.Calendars;
 import net.dries007.tfc.util.calendar.ICalendarTickable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -32,8 +33,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.fml.ModList;
 
 public final class TfcTimeAcceleration
 {
@@ -105,11 +105,6 @@ public final class TfcTimeAcceleration
         if (blockEntity instanceof CropBlockEntity crop)
         {
             ((CropBlockEntityAccessor) crop).tfcTiab$setLastGrowthTick(subtractTimestamp(crop.getLastGrowthTick(), ticks));
-            changed = true;
-        }
-        if (blockEntity instanceof BerryBushBlockEntity bush)
-        {
-            bush.setLastBushTick(subtractTimestamp(Calendars.SERVER.getTicks() - bush.getTicksSinceBushUpdate(), ticks));
             changed = true;
         }
         if (blockEntity instanceof ComposterBlockEntity composter)
@@ -223,10 +218,7 @@ public final class TfcTimeAcceleration
         {
             // The source normally supplies heat once per world tick. Extra crucible
             // ticks must also refresh its five-tick heat window, without burning more fuel.
-            blockEntity.getCapability(HeatCapability.BLOCK_CAPABILITY).ifPresent(heat -> {
-                heat.setTemperature(temperature);
-                heat.setTemperatureIfWarmer(temperature);
-            });
+            HeatCapability.provideHeatTo(level, pos, Direction.DOWN, temperature);
         }
     }
 
@@ -316,12 +308,12 @@ public final class TfcTimeAcceleration
 
     private static ResourceLocation blockId(BlockState state)
     {
-        return ForgeRegistries.BLOCKS.getKey(state.getBlock());
+        return BuiltInRegistries.BLOCK.getKey(state.getBlock());
     }
 
     private static ResourceLocation blockEntityTypeId(BlockEntity blockEntity)
     {
-        return blockEntity == null ? null : ForgeRegistries.BLOCK_ENTITY_TYPES.getKey(blockEntity.getType());
+        return blockEntity == null ? null : BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(blockEntity.getType());
     }
 
     private TfcTimeAcceleration() {}

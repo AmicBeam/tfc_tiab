@@ -17,11 +17,13 @@ TerraFirmaCraft and Firmalife use TFC calendar timestamps for many long-running 
 
 ## Requirements
 
-- Minecraft 1.20.1
-- Forge 47.1.3+
-- TerraFirmaCraft
-- Time In A Bottle 4.0.0+
-- Firmalife is optional
+- Minecraft 1.21.1
+- NeoForge 21.1.234+
+- Java 21
+- TerraFirmaCraft 4.2.16+
+- Patchouli 1.21.1-92-NEOFORGE+
+- Time In A Bottle 6.5.4+ (NeoForge)
+- Firmalife 3.0.16+ (optional)
 
 ## Installation
 
@@ -58,7 +60,7 @@ Available option:
 
 ## Compatibility Notes
 
-This mod targets the Forge 1.20.1 versions of TerraFirmaCraft, Firmalife, and Time In A Bottle.
+Version 0.1.0 targets Minecraft 1.21.1 NeoForge. The [main branch](https://github.com/AmicBeam/tfc_tiab/tree/main) contains the Minecraft 1.20.1 Forge version.
 
 Covered process types include:
 
@@ -68,10 +70,10 @@ Covered process types include:
 - selected TFC machine/process timestamps such as barrel, bloomery, pit kiln, and composter
 - selected Firmalife timestamps such as large planters, grape plants, drying/smoking start ticks, compost tumblers, jarbnets, and beehives
 
-## Changes in 0.0.2
+## Changes in 0.1.0
 
-- Fixed machine acceleration being limited to one extra tick regardless of the selected multiplier, affecting crucible melting and other ticker-based machines.
-- Kept crucible heat input in sync with extra ticks without accelerating the heat source's fuel consumption.
+- Ported to Minecraft 1.21.1 NeoForge with TIAB 6.5.4, TFC 4.2.16, and optional Firmalife 3.0.16.
+- The TFC and Firmalife integration honors the TIAB block blacklist.
 
 ## Building
 
@@ -86,6 +88,8 @@ The built jar will be in:
 ```text
 build/libs/
 ```
+
+Use `./gradlew runServer -PwithFirmalife` to include Firmalife in a development server.
 
 ## License
 

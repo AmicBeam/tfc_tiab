@@ -1,10 +1,6 @@
-//file:noinspection InconsistentLineSeparators
 plugins {
-    id 'eclipse'
-    id 'idea'
-    id 'maven-publish'
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
-    id 'org.spongepowered.mixin' version '0.7.+'
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.141'
 }
 
 version = mod_version
@@ -14,117 +10,63 @@ base {
     archivesName = mod_id
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-
-println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
-
-minecraft {
-    mappings channel: mapping_channel, version: mapping_version
-
-    copyIdeResources = true
-
-    runs {
-        configureEach {
-            workingDirectory project.file('run')
-
-            property 'mixin.env.disableRefMap', 'true'
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', 'debug'
-            arg "-mixin.config=${mod_id}.mixins.json"
-
-            mods {
-                "${mod_id}" {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        client {}
-
-        server {
-            args '--nogui'
-        }
-    }
-}
-
-mixin {
-    add sourceSets.main, "${mod_id}.refmap.json"
-}
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 repositories {
-    mavenCentral()
-    maven {
-        name = 'CurseForge'
-        url = 'https://www.cursemaven.com'
-        content {
-            includeGroup 'curse.maven'
+    exclusiveContent {
+        forRepository { maven { url = 'https://www.cursemaven.com' } }
+        filter { includeGroup 'curse.maven' }
+    }
+    exclusiveContent {
+        forRepository { maven { url = 'https://maven.blamejared.com' } }
+        filter { includeGroup 'vazkii.patchouli' }
+    }
+}
+
+neoForge {
+    version = project.neo_version
+
+    runs {
+        client { client() }
+        server {
+            server()
+            programArgument '--nogui'
         }
     }
-    maven {
-        name = 'Patchouli'
-        url = 'https://maven.blamejared.com'
-    }
-    flatDir {
-        dirs 'libs'
+
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
     }
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-
-    compileOnly fg.deobf("curse.maven:tfc-${tfc_curse_id}:${tfc_file_id}")
-    compileOnly fg.deobf("curse.maven:firmalife-${firmalife_curse_id}:${firmalife_file_id}")
-}
-
-tasks.named('jar', Jar).configure {
-    manifest {
-        attributes([
-                'Specification-Title'     : mod_id,
-                'Specification-Vendor'    : mod_authors,
-                'Specification-Version'   : '1',
-                'Implementation-Title'    : project.name,
-                'Implementation-Version'  : project.jar.archiveVersion,
-                'Implementation-Vendor'    : mod_authors,
-                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                'MixinConfigs'            : "${mod_id}.mixins.json"
-        ])
+    implementation "curse.maven:terrafirmacraft-302973:${tfc_file_id}"
+    implementation "curse.maven:time-in-a-bottle-895919:${tiab_file_id}"
+    compileOnly "curse.maven:firmalife-453394:${firmalife_file_id}"
+    runtimeOnly "vazkii.patchouli:Patchouli:${patchouli_version}"
+    if (providers.gradleProperty('withFirmalife').isPresent()) {
+        runtimeOnly "curse.maven:firmalife-453394:${firmalife_file_id}"
     }
 }
-
-jar.finalizedBy('reobfJar')
 
 tasks.named('processResources', ProcessResources).configure {
-    var replaceProperties = [
-            mod_id                 : mod_id,
-            mod_name               : mod_name,
-            mod_display_name       : mod_display_name,
-            mod_license            : mod_license,
-            mod_version            : mod_version,
-            mod_authors            : mod_authors,
-            mod_description        : mod_description,
-            loader_version_range   : loader_version_range,
-            forge_version_range    : forge_version_range,
-            minecraft_version_range: minecraft_version_range
+    def metadata = [
+        minecraft_version     : minecraft_version,
+        neo_version           : neo_version,
+        tfc_version           : tfc_version,
+        tiab_version          : tiab_version,
+        firmalife_version     : firmalife_version,
+        mod_id                : mod_id,
+        mod_display_name      : mod_display_name,
+        mod_license           : mod_license,
+        mod_version           : mod_version,
+        mod_authors           : mod_authors,
+        mod_description       : mod_description
     ]
-    inputs.properties replaceProperties
-
-    filesMatching(['META-INF/mods.toml']) {
-        expand replaceProperties
-    }
-}
-
-publishing {
-    publications {
-        register('mavenJava', MavenPublication) {
-            artifact jar
-        }
-    }
-    repositories {
-        maven {
-            url "file://${project.projectDir}/mcmodsrepo"
-        }
-    }
+    inputs.properties metadata
+    filesMatching('META-INF/neoforge.mods.toml') { expand metadata }
 }
 
 tasks.withType(JavaCompile).configureEach {

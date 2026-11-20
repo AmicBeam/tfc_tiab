@@ -1,24 +1,24 @@
 package com.tfctiab.config;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 public final class TfcTiabConfig
 {
-    public static final ForgeConfigSpec SERVER_SPEC;
+    public static final ModConfigSpec SERVER_SPEC;
     public static final Server SERVER;
 
     static
     {
-        final ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+        final ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
         SERVER = new Server(builder);
         SERVER_SPEC = builder.build();
     }
 
     public static final class Server
     {
-        public final ForgeConfigSpec.IntValue averageRandomTickInterval;
+        public final ModConfigSpec.IntValue averageRandomTickInterval;
 
-        private Server(ForgeConfigSpec.Builder builder)
+        private Server(ModConfigSpec.Builder builder)
         {
             builder.push("acceleration");
             averageRandomTickInterval = builder

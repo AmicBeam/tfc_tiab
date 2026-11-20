@@ -2,9 +2,8 @@ package com.tfctiab.mixin;
 
 import java.util.List;
 import java.util.Set;
-import net.minecraftforge.fml.loading.FMLLoader;
-import net.minecraftforge.fml.loading.LoadingModList;
-import net.minecraftforge.forgespi.language.IModInfo;
+import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.LoadingModList;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -47,17 +46,7 @@ public final class TfcTiabMixinPlugin implements IMixinConfigPlugin
 
     private static boolean isModLoadedEarly(String modId)
     {
-        try
-        {
-            final LoadingModList loadingModList = FMLLoader.getLoadingModList();
-            return loadingModList != null && loadingModList.getModFiles().stream()
-                .flatMap(file -> file.getMods().stream())
-                .map(IModInfo::getModId)
-                .anyMatch(modId::equals);
-        }
-        catch (Throwable ignored)
-        {
-            return false;
-        }
+        final LoadingModList loadingModList = FMLLoader.getLoadingModList();
+        return loadingModList != null && loadingModList.getModFileById(modId) != null;
     }
 }
